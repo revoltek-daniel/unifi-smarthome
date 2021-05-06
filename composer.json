@@ -1,0 +1,30 @@
+{
+  "name": "vendor_name/unifi-smarthome",
+  "description": "description",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "daniel",
+      "email": "email@example.com"
+    }
+  ],
+  "repositories": [
+    {
+      "type": "git",
+      "url": "git@github.com:revoltek-daniel/UniFi-API-client.git"
+    }
+  ],
+  "require": {
+    "php": "7.4",
+    "ext-gd": "*",
+    "ext-json": "*",
+    "art-of-wifi/unifi-api-client": "dev-feature/add-basic-protect-client",
+    "php-mqtt/client": "^1.1",
+    "nette/mail": "^3.1"
+  }
+  ,
+  "require-dev": {
+    "roave/security-advisories": "dev-latest"
+  }
+}
