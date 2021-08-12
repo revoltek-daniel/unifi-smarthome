@@ -21,7 +21,7 @@ $mail->setFrom($mailFrom)
     ->setSubject('Protect Alert')
 ;
 
-$body = $itemCount . ' Events detected<br/>';
+$body = $itemCount . ' Event' . (($itemCount > 1 ) ? 's' : '') . ' detected<br/>';
 
 $separator = '';
 foreach ($data as $event) {
@@ -30,6 +30,7 @@ foreach ($data as $event) {
     $body .= 'Video: <a href="http://' . $_SERVER['HTTP_HOST'] . '/' . $event['videoUrl'] . '">Video</a>';
     $mail->addAttachment($event['thumbnailUrl']);
     $mail->addAttachment($event['heatmapImage']);
+    $mail->addAttachment($event['animatedImage']);
 
     $separator = '<br/>';
 }
