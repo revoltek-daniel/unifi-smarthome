@@ -49,7 +49,9 @@ if ($data) {
             $hasHeatmapImage = $protectClient->downloadHeatmapImage($dlPath, $event->id);
 
             if ($hasImage && $hasHeatmapImage) {
-                mergeHeatmapImage($thumbnailDlPath, $dlPath);
+                if (mergeHeatmapImage($thumbnailDlPath, $dlPath) === false) {
+                    $heatmapName = $thumbnailName = '../no-image.jpg';
+                }
             } else {
                 $heatmapName = $thumbnailName = '../no-image.jpg';
                 file_put_contents('log.txt', $event->id . ' no image loaded', FILE_APPEND);
@@ -95,6 +97,10 @@ foreach (scandir($path) as $file) {
 function mergeHeatmapImage($thumbnail, $heatmap)
 {
     $heatmapPng = imagecreatefrompng($heatmap);
+    if ($heatmapPng === false) {
+        return false;
+    }
+
     $dest1 = imagecreatefromjpeg($thumbnail);
 
     [$newWidth, $newHeight] = getimagesize($thumbnail);
@@ -112,6 +118,8 @@ function mergeHeatmapImage($thumbnail, $heatmap)
     imagecopymerge_alpha($dest1, $heatmapResize, 0, 0, 0, 0, $src_w, $src_h, 100);
 
     imagepng($dest1, $heatmap);
+
+    return true;
 }
 
 function imagecopymerge_alpha($dst_im, $src_im, $dst_x, $dst_y, $src_x, $src_y, $src_w, $src_h, $pct)
