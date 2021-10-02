@@ -74,13 +74,21 @@ if ($data) {
             file_put_contents('log.txt', $e->getMessage(), FILE_APPEND);
         }
     }
+    try {
+        $mqtt = new \PhpMqtt\Client\MqttClient($mqttHost);
 
-    $mqtt = new \PhpMqtt\Client\MqttClient($mqttHost);
-    $mqtt->connect();
+        $mqtt->connect();
 
-    $mqtt->publish('unifi/protect/event', json_encode($messages));
+        try {
+            $mqtt->publish('unifi/protect/event', json_encode($messages, JSON_THROW_ON_ERROR));
+        } catch (JsonException $e) {
+            echo 'json decode failed' . $e->getMessage();
+        }
 
-    $mqtt->disconnect();
+        $mqtt->disconnect();
+    } catch (\PhpMqtt\Client\Exceptions\ConfigurationInvalidException | \PhpMqtt\Client\Exceptions\ConnectingToBrokerFailedException | \PhpMqtt\Client\Exceptions\RepositoryException | \PhpMqtt\Client\Exceptions\DataTransferException | \PhpMqtt\Client\Exceptions\ProtocolNotSupportedException $e) {
+        echo 'mqtt connection failed' . $e->getMessage();
+    }
 }
 
 // cleanup
@@ -94,7 +102,7 @@ foreach (scandir($path) as $file) {
     }
 }
 
-function mergeHeatmapImage($thumbnail, $heatmap)
+function mergeHeatmapImage(string $thumbnail, string $heatmap): bool
 {
     $heatmapPng = imagecreatefrompng($heatmap);
     if ($heatmapPng === false) {
@@ -115,14 +123,14 @@ function mergeHeatmapImage($thumbnail, $heatmap)
 
     [$src_w, $src_h] = getimagesize($thumbnail);
 
-    imagecopymerge_alpha($dest1, $heatmapResize, 0, 0, 0, 0, $src_w, $src_h, 100);
+    imagecopymergeAlpha($dest1, $heatmapResize, 0, 0, 0, 0, $src_w, $src_h, 100);
 
     imagepng($dest1, $heatmap);
 
     return true;
 }
 
-function imagecopymerge_alpha($dst_im, $src_im, $dst_x, $dst_y, $src_x, $src_y, $src_w, $src_h, $pct)
+function imagecopymergeAlpha($dst_im, $src_im, int $dst_x, int $dst_y, $src_x, $src_y, int $src_w, int $src_h, int $pct): void
 {
     $cut = imagecreatetruecolor($src_w, $src_h);
     imagecopy($cut, $dst_im, 0, 0, $dst_x, $dst_y, $src_w, $src_h);
