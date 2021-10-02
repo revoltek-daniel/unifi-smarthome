@@ -3,6 +3,7 @@
 $userName = 'node-red';
 $password = '';
 $host = 'https://example.com';
+$guestMac = 'ff:ff:ff:ff';
 
 $defaultCameraId = '';
 
