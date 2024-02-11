@@ -4,6 +4,8 @@ require_once('vendor/autoload.php');
 require_once('config.php');
 
 $unifiClient = new \UniFi_API\Client($userName, $password, $host);
+$unifiClient->setCookiePath(__DIR__ . '/cookie/cookie.txt');
+$unifiClient->setKeepSession(true);
 $unifiClient->login();
 
 $authorizedMinutes = 560;

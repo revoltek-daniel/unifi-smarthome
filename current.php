@@ -7,6 +7,8 @@ ini_set('display_errors', 1);
 $cameraId = $_GET['id'] ?? $defaultCameraId;
 
 $protectClient = new \UniFi_API\ProtectClient($userName, $password, $host);
+$protectClient->setCookiePath(__DIR__ . '/cookie/cookie.txt');
+$protectClient->setKeepSession(true);
 $protectClient->login();
 
 $file = tmpfile();

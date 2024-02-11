@@ -6,6 +6,8 @@ require_once('config.php');
 ini_set('display_errors', 1);
 
 $protectClient = new \UniFi_API\ProtectClient($userName, $password, $host);
+$protectClient->setCookiePath(__DIR__ . '/cookie/cookie.txt');
+$protectClient->setKeepSession(true);
 $protectClient->login();
 //$startOffset = 2*3600;
 
@@ -39,15 +41,27 @@ if ($data) {
         try {
             $thumbnailName = $event->id . '.jpg';
             $thumbnailDlPath = $path . $thumbnailName;
-            $hasImage = $protectClient->downloadEventThumbnail($thumbnailDlPath, $event->id);
+            if (\file_exists($thumbnailDlPath) === false || \filesize($thumbnailDlPath) === 0) {
+                $hasImage = $protectClient->downloadEventThumbnail($thumbnailDlPath, $event->id);
+            } else {
+                $hasImage = true;
+            }
 
             $videoName = $event->id . '.mp4';
             $dlPath = $path . $videoName;
-            $hasVideo = $protectClient->downloadVideo($dlPath, $event->camera, $event->start, $event->end);
+            if (\file_exists($dlPath) === false || \filesize($dlPath) === 0) {
+                $hasVideo = $protectClient->downloadVideo($dlPath, $event->camera, $event->start, $event->end);
+            } else {
+                $hasVideo = true;
+            }
 
             $heatmapName = $event->id . '-heat.png';
             $dlPath = $path . $heatmapName;
-            $hasHeatmapImage = $protectClient->downloadHeatmapImage($dlPath, $event->id);
+            if (\file_exists($dlPath) === false || \filesize($dlPath) === 0) {
+                $hasHeatmapImage = $protectClient->downloadHeatmapImage($dlPath, $event->id);
+            } else {
+                $hasHeatmapImage = true;
+            }
 
             if ($hasImage && $hasHeatmapImage) {
                 if (mergeHeatmapImage($thumbnailDlPath, $dlPath) === false) {
