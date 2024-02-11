@@ -21,7 +21,8 @@
     "ext-json": "*",
     "art-of-wifi/unifi-api-client": "dev-feature/add-basic-protect-client",
     "php-mqtt/client": "^1.1",
-    "nette/mail": "^3.1"
+    "nette/mail": "^3.1",
+    "psr/log": "^1.1"
   }
   ,
   "require-dev": {

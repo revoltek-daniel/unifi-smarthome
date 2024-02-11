@@ -5,14 +5,14 @@ require_once('config.php');
 
 ini_set('display_errors', 1);
 
-
 $protectClient = new \UniFi_API\ProtectClient($userName, $password, $host);
 $protectClient->login();
 //$startOffset = 2*3600;
 
 $startOffset = 5*60;
 
-$data = $protectClient->getEvents(time() - $startOffset, time(), [\UniFi_API\ProtectClient::EVENT_TYPE_MOTION]);
+//$data = $protectClient->getEvents(time() - $startOffset, time(), [\UniFi_API\ProtectClient::EVENT_TYPE_MOTION]);
+$data = $protectClient->getDetections(time() - $startOffset, time());
 
 $path = __DIR__ . '/eventData/';
 
@@ -21,6 +21,8 @@ if ((is_dir($path) === false) && !mkdir($path) && !is_dir($path)) {
 }
 
 if ($data) {
+    $data = $data->events;
+
     /**
      * Get all cameras
      */
@@ -39,7 +41,6 @@ if ($data) {
             $thumbnailDlPath = $path . $thumbnailName;
             $hasImage = $protectClient->downloadEventThumbnail($thumbnailDlPath, $event->id);
 
-
             $videoName = $event->id . '.mp4';
             $dlPath = $path . $videoName;
             $hasVideo = $protectClient->downloadVideo($dlPath, $event->camera, $event->start, $event->end);
@@ -50,22 +51,25 @@ if ($data) {
 
             if ($hasImage && $hasHeatmapImage) {
                 if (mergeHeatmapImage($thumbnailDlPath, $dlPath) === false) {
-                    $heatmapName = $thumbnailName = '../no-image.jpg';
+                    $heatmapName = '../no-image.jpg';
                 }
             } else {
-                $heatmapName = $thumbnailName = '../no-image.jpg';
+                $heatmapName = '../no-image.jpg';
                 file_put_contents('log.txt', $event->id . ' no image loaded', FILE_APPEND);
             }
 
             // remove microseconds from timestamp
             $start = substr($event->start, 0, 10);
             $end = substr($event->end, 0, 10);
-            $messages[] = [
+
+            $messages[$start] = [
                 'type' => $event->type,
+                'detectTypes' => $event->smartDetectTypes,
                 'start' => date('c', $start),
                 'end' => date('c', $end),
                 'length' => $end - $start,
                 'camera' => $cameras[$event->camera]->name,
+                'cameraId' => $event->camera,
                 'thumbnailUrl' => 'eventData/' . $thumbnailName,
                 'heatmapImage' => 'eventData/'. $heatmapName,
                 'videoUrl' => 'eventData/' . $videoName,
@@ -74,6 +78,7 @@ if ($data) {
             file_put_contents('log.txt', $e->getMessage(), FILE_APPEND);
         }
     }
+
     try {
         $mqtt = new \PhpMqtt\Client\MqttClient($mqttHost);
 
