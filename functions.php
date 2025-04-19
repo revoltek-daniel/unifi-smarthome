@@ -39,8 +39,6 @@ function handleEvent($event, \UniFi_API\ProtectClient $protectClient, $cameras, 
     $start = substr($event->start, 0, 10);
     $end = substr($event->end, 0, 10);
 
-    file_put_contents('log.txt', 'end: ' . $event->end . "\r\n", FILE_APPEND);
-
     $messages[$start] = [
         'type' => $event->type,
         'detectTypes' => $event->smartDetectTypes,
