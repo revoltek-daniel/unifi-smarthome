@@ -16,7 +16,7 @@
     }
   ],
   "require": {
-    "php": "7.4",
+    "php": "^8.2",
     "ext-gd": "*",
     "ext-json": "*",
     "art-of-wifi/unifi-api-client": "dev-feature/add-basic-protect-client",
