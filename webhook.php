@@ -65,3 +65,14 @@ try {
 } catch (\PhpMqtt\Client\Exceptions\ConfigurationInvalidException | \PhpMqtt\Client\Exceptions\ConnectingToBrokerFailedException | \PhpMqtt\Client\Exceptions\RepositoryException | \PhpMqtt\Client\Exceptions\DataTransferException | \PhpMqtt\Client\Exceptions\ProtocolNotSupportedException $e) {
     file_put_contents('log.txt', 'mqtt connection failed' . $e->getMessage() . "\r\n");
 }
+
+// cleanup
+foreach (scandir($path) as $file) {
+    if (in_array($file, [".", ".."])) {
+        continue;
+    }
+
+    if (filemtime($path . $file) < time() - 24*3600) {
+        unlink($path . $file);
+    }
+}
