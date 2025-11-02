@@ -40,14 +40,14 @@ try {
     } while ($event->end === null && $loops < 15);
 
     if ($event->end === null) {
-        file_put_contents('log.txt', 'event not ended' . $eventId . "\r\n", FILE_APPEND);
-        die();
+        file_put_contents('log.txt', date('Y-m-d H:i') . ': event not ended' . $eventId . "\r\n", FILE_APPEND);
+        $event->end = time();
     }
 
     $messages = [];
     $messages += handleEvent($event, $protectClient, $cameras, $path);
 } catch (Throwable $e) {
-    file_put_contents('log.txt', 'exception ' . $e->getFile() . ' ' .  $e->getLine() . ' ' . $e->getMessage() . "\r\n", FILE_APPEND);
+    file_put_contents('log.txt', date('Y-m-d H:i') . ': exception ' . $e->getFile() . ' ' .  $e->getLine() . ' ' . $e->getMessage() . "\r\n", FILE_APPEND);
 }
 
 try {
@@ -56,14 +56,16 @@ try {
     $mqtt->connect();
 
     try {
-        $mqtt->publish('unifi/protect/event', json_encode($messages, JSON_THROW_ON_ERROR));
+        if (empty($messages) === false) {
+            $mqtt->publish('unifi/protect/event', json_encode($messages, JSON_THROW_ON_ERROR));
+        }
     } catch (JsonException $e) {
-        echo 'json decode failed' . $e->getMessage();
+        file_put_contents('log.txt', date('Y-m-d H:i') . ': json decode failed' . $e->getMessage() . "\r\n", FILE_APPEND);
     }
 
     $mqtt->disconnect();
 } catch (\PhpMqtt\Client\Exceptions\ConfigurationInvalidException | \PhpMqtt\Client\Exceptions\ConnectingToBrokerFailedException | \PhpMqtt\Client\Exceptions\RepositoryException | \PhpMqtt\Client\Exceptions\DataTransferException | \PhpMqtt\Client\Exceptions\ProtocolNotSupportedException $e) {
-    file_put_contents('log.txt', 'mqtt connection failed' . $e->getMessage() . "\r\n");
+    file_put_contents('log.txt', date('Y-m-d H:i') . ': mqtt connection failed' . $e->getMessage() . "\r\n");
 }
 
 // cleanup
