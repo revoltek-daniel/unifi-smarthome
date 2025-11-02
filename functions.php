@@ -14,6 +14,16 @@ function handleEvent($event, \UniFi_API\ProtectClient $protectClient, $cameras, 
     $dlPath = $path . $videoName;
     if (\file_exists($dlPath) === false || \filesize($dlPath) === 0) {
         $hasVideo = $protectClient->downloadVideo($dlPath, $event->camera, $event->start, $event->end);
+
+        if (\filesize($dlPath) === 0) {
+            file_put_contents('log.txt', $event->id . ' video empty, try again start:' . $event->start . ' - end:' . $event->end. "\r\n", FILE_APPEND);
+            $hasVideo = $protectClient->downloadVideo($dlPath, $event->camera, $event->start, $event->end);
+
+            if (\filesize($dlPath) === 0) {
+                file_put_contents('log.txt', $event->id . " video empty again\r\n", FILE_APPEND);
+                return [];
+            }
+        }
     } else {
         $hasVideo = true;
     }
