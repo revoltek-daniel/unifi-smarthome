@@ -16,9 +16,6 @@ $authorizedMinutes = $time ?? 560;
 $mac = $argumentMac ?? $guestMac;
 $client = $unifiClient->list_clients($mac);
 
-var_dump($unifiClient->authorize_guest('06:40:8c:56:65:d6', 10*60));
-
 if ($client !== false && $client[0]->authorized === false) {
-   // $unifiClient->unauthorize_guest($mac);
     $unifiClient->authorize_guest($mac, $authorizedMinutes);
 }
